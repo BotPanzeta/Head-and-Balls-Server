@@ -116,34 +116,27 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<String> register(HttpSession session, @Valid @RequestBody User user) {
-    //Register user
-    try {
-      //Check if user is valid
-      user.checkValid();
+    //Check if user is valid
+    user.checkValid();
 
-      //Check if exists
-      if (users.containsKey(user.getUsername()))
-        throw new InvalidCredentialsException("User already exists");
+    //Check if exists
+    if (users.containsKey(user.getUsername()))
+      throw new InvalidCredentialsException("User already exists");
 
-      //Get encoded password
-      String encodedPassword = encode(user.getPassword());
-      if (encodedPassword == user.getPassword())
-        throw new RuntimeException("Error while encoding password");
-      
-      //Save encoded password
-      user.setPassword(encodedPassword);
+    //Get encoded password
+    String encodedPassword = encode(user.getPassword());
+    if (encodedPassword == user.getPassword())
+      throw new RuntimeException("Error while encoding password");
+    
+    //Save encoded password
+    user.setPassword(encodedPassword);
 
-      //Save user
-      users.put(user.getUsername(), user);
-      saveUsers();
+    //Save user
+    users.put(user.getUsername(), user);
+    saveUsers();
 
-      //Login (save session)
-      saveSession(session, user);
-
-    } catch (UserNotFoundException | InvalidCredentialsException e) {
-      //Handle exception with @ControllerAdvice
-      throw e;
-    }
+    //Login (save session)
+    saveSession(session, user);
 
     //All good
     return ResponseEntity.ok("User registered successfully");
@@ -191,30 +184,24 @@ public class AuthController {
 
   @PostMapping("/login")
   public ResponseEntity<String> login(HttpSession session, @Valid @RequestBody User user) {
-    try {
-      //Check if user is valid
-      user.checkValid();
+    //Check if user is valid
+    user.checkValid();
 
-      //Check if exists
-      if (!users.containsKey(user.getUsername()))
-        throw new UserNotFoundException("User does not exist");
+    //Check if exists
+    if (!users.containsKey(user.getUsername()))
+      throw new UserNotFoundException("User does not exist");
 
-      //Get encoded password
-      String encodedPassword = encode(user.getPassword());
-      if (encodedPassword == user.getPassword())
-        throw new RuntimeException("Error while encoding password");
+    //Get encoded password
+    String encodedPassword = encode(user.getPassword());
+    if (encodedPassword == user.getPassword())
+      throw new RuntimeException("Error while encoding password");
 
-      //Invalid user
-      if (!encodedPassword.equals(users.get(user.getUsername()).getPassword())) 
-        throw new InvalidCredentialsException("Invalid user credentials");
+    //Invalid user
+    if (!encodedPassword.equals(users.get(user.getUsername()).getPassword())) 
+      throw new InvalidCredentialsException("Invalid user credentials");
 
-      //Save session
-      saveSession(session, user);
-
-    } catch (UserNotFoundException | InvalidCredentialsException e) {
-      //Handle exception with @ControllerAdvice
-      throw e;
-    }
+    //Save session
+    saveSession(session, user);
 
     //All good
     return ResponseEntity.ok("Logged in successfully");
