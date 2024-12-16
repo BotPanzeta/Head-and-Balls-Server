@@ -23,7 +23,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-  private static Map<String, String> connected = new HashMap<String, String>();
+  //private static Map<String, String> connected = new HashMap<String, String>();
   private static Map<String, User> users = new HashMap<String, User>();
 
 
@@ -69,7 +69,8 @@ public class AuthController {
   }
 
   public static boolean isLogged(HttpSession session) {
-    return connected.containsKey(session.getId());
+    System.out.println(session.getId());
+    return users.containsKey(session.getAttribute("username"));
   }
 
   public static String getUsername(HttpSession session) {
@@ -88,7 +89,7 @@ public class AuthController {
   |  $$$$$$/| $$  | $$|  $$$$$$$|  $$$$$$$| $$ \  $$
    \______/ |__/  |__/ \_______/ \_______/|__/  \_*/
   
-  @GetMapping()
+  @GetMapping("/check")
   public User check(HttpSession session) {
     //Not logged in
     if (!AuthController.isLogged(session)) throw new RuntimeException("Not logged in");
@@ -212,7 +213,7 @@ public class AuthController {
     session.setAttribute("username", user.getUsername());
 
     //Save session in connected list
-    connected.put(session.getId(), user.getUsername());
+    //connected.put(session.getId(), user.getUsername());
   }
   
   @PostMapping("/logout")
@@ -222,7 +223,7 @@ public class AuthController {
     session.invalidate();
 
     //Remove session from connected list
-    if (connected.containsKey(session.getId())) connected.remove(session.getId());
+    //if (connected.containsKey(session.getId())) connected.remove(session.getId());
 
     //All good
     return ResponseEntity.ok("Logged out successfully");
