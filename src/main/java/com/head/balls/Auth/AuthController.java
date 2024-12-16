@@ -23,8 +23,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-  private ArrayList<HttpSession> sessions = new ArrayList<>();
-  private Map<String, User> users = new HashMap<String, User>();
+  private static Map<String, String> connected = new HashMap<String, String>();
+  private static Map<String, User> users = new HashMap<String, User>();
 
 
   public AuthController() {
@@ -69,8 +69,7 @@ public class AuthController {
   }
 
   public static boolean isLogged(HttpSession session) {
-    Object logged = session.getAttribute("logged");
-    return logged == null ? false : (boolean) session.getAttribute("logged");
+    return connected.containsKey(session.getId());
   }
 
   public static String getUsername(HttpSession session) {
@@ -79,7 +78,7 @@ public class AuthController {
   }
 
 
-  
+
     /*$$$$$  /$$                           /$$      
    /$$__  $$| $$                          | $$      
   | $$  \__/| $$$$$$$   /$$$$$$   /$$$$$$$| $$   /$$
@@ -92,8 +91,7 @@ public class AuthController {
   @GetMapping()
   public User check(HttpSession session) {
     //Not logged in
-    if (!AuthController.isLogged(session)) 
-      throw new RuntimeException("Not logged in");
+    if (!AuthController.isLogged(session)) throw new RuntimeException("Not logged in");
 
     //Get username
     String username = getUsername(session);
@@ -108,17 +106,14 @@ public class AuthController {
 
 
 
-   /*$$$$$$                      /$$             /$$
-  | $$__  $$                    |__/            | $$
-  | $$  \ $$  /$$$$$$   /$$$$$$  /$$  /$$$$$$$ /$$$$$$    /$$$$$$   /$$$$$$ 
-  | $$$$$$$/ /$$__  $$ /$$__  $$| $$ /$$_____/|_  $$_/   /$$__  $$ /$$__  $$
-  | $$__  $$| $$$$$$$$| $$  \ $$| $$|  $$$$$$   | $$    | $$$$$$$$| $$  \__/
-  | $$  \ $$| $$_____/| $$  | $$| $$ \____  $$  | $$ /$$| $$_____/| $$
-  | $$  | $$|  $$$$$$$|  $$$$$$$| $$ /$$$$$$$/  |  $$$$/|  $$$$$$$| $$
-  |__/  |__/ \_______/ \____  $$|__/|_______/    \___/   \_______/|__/
-                       /$$  \ $$
-                      |  $$$$$$/
-                       \_____*/
+    /*$$$$$                                  /$$     /$$                    
+   /$$__  $$                                | $$    |__/                    
+  | $$  \__/  /$$$$$$   /$$$$$$   /$$$$$$  /$$$$$$   /$$  /$$$$$$  /$$$$$$$ 
+  | $$       /$$__  $$ /$$__  $$ |____  $$|_  $$_/  | $$ /$$__  $$| $$__  $$
+  | $$      | $$  \__/| $$$$$$$$  /$$$$$$$  | $$    | $$| $$  \ $$| $$  \ $$
+  | $$    $$| $$      | $$_____/ /$$__  $$  | $$ /$$| $$| $$  | $$| $$  | $$
+  |  $$$$$$/| $$      |  $$$$$$$|  $$$$$$$  |  $$$$/| $$|  $$$$$$/| $$  | $$
+   \______/ |__/       \_______/ \_______/   \___/  |__/ \______/ |__/  |_*/
 
   @PostMapping("/register")
   public ResponseEntity<String> register(HttpSession session, @Valid @RequestBody User user) {
@@ -142,6 +137,9 @@ public class AuthController {
       //Save user
       users.put(user.getUsername(), user);
       saveUsers();
+
+      //Login (save session)
+      saveSession(session, user);
 
     } catch (UserNotFoundException | InvalidCredentialsException e) {
       //Handle exception with @ControllerAdvice
@@ -170,6 +168,9 @@ public class AuthController {
     //Delete user
     users.remove(user.getUsername());
     saveUsers();
+
+    //Logout
+    logout(session);
 
     //All good
     return ResponseEntity.ok("User deleted successfully");
@@ -209,8 +210,7 @@ public class AuthController {
         throw new InvalidCredentialsException("Invalid user credentials");
 
       //Save session
-      session.setAttribute("username", user.getUsername());
-      session.setAttribute("logged", true);
+      saveSession(session, user);
 
     } catch (UserNotFoundException | InvalidCredentialsException e) {
       //Handle exception with @ControllerAdvice
@@ -221,25 +221,24 @@ public class AuthController {
     return ResponseEntity.ok("Logged in successfully");
   }
   
-  
-  
-   /*$                                                 /$$    
-  | $$                                                | $$    
-  | $$        /$$$$$$   /$$$$$$   /$$$$$$  /$$   /$$ /$$$$$$  
-  | $$       /$$__  $$ /$$__  $$ /$$__  $$| $$  | $$|_  $$_/  
-  | $$      | $$  \ $$| $$  \ $$| $$  \ $$| $$  | $$  | $$    
-  | $$      | $$  | $$| $$  | $$| $$  | $$| $$  | $$  | $$ /$$
-  | $$$$$$$$|  $$$$$$/|  $$$$$$$|  $$$$$$/|  $$$$$$/  |  $$$$/
-  |________/ \______/  \____  $$ \______/  \______/    \___/  
-                       /$$  \ $$
-                      |  $$$$$$/
-                       \_____*/
+  private void saveSession(HttpSession session, User user) {
+    //Save username in session
+    session.setAttribute("username", user.getUsername());
+
+    //Save session in connected list
+    connected.put(session.getId(), user.getUsername());
+  }
   
   @PostMapping("/logout")
   public ResponseEntity<String> logout(HttpSession session) {
+    //Invalidate session
     session.setAttribute("username", null);
-    session.setAttribute("logged", false);
     session.invalidate();
+
+    //Remove session from connected list
+    if (connected.containsKey(session.getId())) connected.remove(session.getId());
+
+    //All good
     return ResponseEntity.ok("Logged out successfully");
   }
 
