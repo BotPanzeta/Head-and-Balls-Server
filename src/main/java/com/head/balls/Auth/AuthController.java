@@ -79,6 +79,34 @@ public class AuthController {
   }
 
 
+  
+    /*$$$$$  /$$                           /$$      
+   /$$__  $$| $$                          | $$      
+  | $$  \__/| $$$$$$$   /$$$$$$   /$$$$$$$| $$   /$$
+  | $$      | $$__  $$ /$$__  $$ /$$_____/| $$  /$$/
+  | $$      | $$  \ $$| $$$$$$$$| $$      | $$$$$$/ 
+  | $$    $$| $$  | $$| $$_____/| $$      | $$_  $$ 
+  |  $$$$$$/| $$  | $$|  $$$$$$$|  $$$$$$$| $$ \  $$
+   \______/ |__/  |__/ \_______/ \_______/|__/  \_*/
+  
+  @GetMapping()
+  public User check(HttpSession session) {
+    //Not logged in
+    if (!AuthController.isLogged(session)) 
+      throw new RuntimeException("Not logged in");
+
+    //Get username
+    String username = getUsername(session);
+
+    //Check if exists
+    if (!users.containsKey(username))
+      throw new InvalidCredentialsException("User does not exists");
+
+    //Get user
+    return users.get(username);
+  }
+
+
 
    /*$$$$$$                      /$$             /$$
   | $$__  $$                    |__/            | $$
@@ -93,7 +121,7 @@ public class AuthController {
                        \_____*/
 
   @PostMapping("/register")
-  public ResponseEntity<String> register(@Valid @RequestBody User user) {
+  public ResponseEntity<String> register(HttpSession session, @Valid @RequestBody User user) {
     //Register user
     try {
       //Check if user is valid
@@ -124,6 +152,29 @@ public class AuthController {
     return ResponseEntity.ok("User registered successfully");
   }
 
+  @DeleteMapping("/delete")
+  public ResponseEntity<String> delete(HttpSession session) {
+    //Not logged in
+    if (!AuthController.isLogged(session)) throw new RuntimeException("Not logged in");
+
+    //Get username
+    String username = getUsername(session);
+
+    //Check if exists
+    if (!users.containsKey(username))
+      throw new InvalidCredentialsException("User does not exists");
+
+    //Get user
+    User user = users.get(username);
+
+    //Delete user
+    users.remove(user.getUsername());
+    saveUsers();
+
+    //All good
+    return ResponseEntity.ok("User deleted successfully");
+  }
+
 
 
    /*$                           /$$
@@ -139,7 +190,7 @@ public class AuthController {
                        \_____*/
 
   @PostMapping("/login")
-  public ResponseEntity<String> login(@Valid @RequestBody User user, HttpSession session) {
+  public ResponseEntity<String> login(HttpSession session, @Valid @RequestBody User user) {
     try {
       //Check if user is valid
       user.checkValid();
@@ -190,22 +241,6 @@ public class AuthController {
     session.setAttribute("logged", false);
     session.invalidate();
     return ResponseEntity.ok("Logged out successfully");
-  }
-
-  
-
-    /*$$$$$  /$$                           /$$      
-   /$$__  $$| $$                          | $$      
-  | $$  \__/| $$$$$$$   /$$$$$$   /$$$$$$$| $$   /$$
-  | $$      | $$__  $$ /$$__  $$ /$$_____/| $$  /$$/
-  | $$      | $$  \ $$| $$$$$$$$| $$      | $$$$$$/ 
-  | $$    $$| $$  | $$| $$_____/| $$      | $$_  $$ 
-  |  $$$$$$/| $$  | $$|  $$$$$$$|  $$$$$$$| $$ \  $$
-   \______/ |__/  |__/ \_______/ \_______/|__/  \_*/
-  
-  @GetMapping("/check")
-  public boolean check(HttpSession session) {
-    return AuthController.isLogged(session);
   }
 
 
