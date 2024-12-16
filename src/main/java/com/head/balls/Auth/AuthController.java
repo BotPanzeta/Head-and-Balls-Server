@@ -96,9 +96,8 @@ public class AuthController {
     //Get username
     String username = getUsername(session);
 
-    //Check if exists
-    if (!users.containsKey(username))
-      throw new InvalidCredentialsException("User does not exists");
+    //Check if user exists
+    if (!users.containsKey(username)) throw new UserNotFoundException("User does not exists");
 
     //Get user
     return users.get(username);
