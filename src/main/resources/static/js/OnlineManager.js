@@ -90,6 +90,30 @@ class OnlineManager {
       })
   }
 
+  //Delete
+  static deleteAccount(onRegister){
+    //Create request
+    const request = new Request('http://' + OnlineManager.IP + '/api/auth/delete', {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+
+    //Send request
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          OnlineManager.isLogged = false
+          onRegister(OnlineManager.isLogged)
+        } else {
+          throw new Error("Error deleting account")
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+        onRegister(OnlineManager.isLogged)
+      })
+  }
+
   //Loggin
   static login(username, password, onLogged) {
     //Create request
