@@ -1,6 +1,8 @@
 class OnlineManager {
 
   static IP = ''
+  static Name = ''
+  static Password = ''
   static isLogged = false
 
   static init() {
@@ -145,18 +147,11 @@ class OnlineManager {
       })
   }
 
-  static logout(onLogged) {
+  static logout(onLogout) {
     //Create request
     const request = new Request('http://' + OnlineManager.IP + '/api/auth/logout', {
       method: 'POST',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password
-      })
     })
 
     //Send request
@@ -164,14 +159,14 @@ class OnlineManager {
       .then((response) => {
         if (response.ok) {
           OnlineManager.isLogged = false
-          onCheck(OnlineManager.isLogged)
+          onLogout(OnlineManager.isLogged)
         } else {
           throw new Error("Error logging out")
         }
       })
       .catch((error) => {
         console.log(error)
-        onCheck(OnlineManager.isLogged)
+        onLogout(OnlineManager.isLogged)
       })
   }
 }

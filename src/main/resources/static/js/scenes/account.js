@@ -3,7 +3,13 @@ class SceneAccount extends Phaser.Scene {
     super({ key: 'Account' });
   }
 
+  deleteButton
+  register
+  login
+  logout
 
+  usernameInput
+  passwordInput
 
     /*$$$$$                                  /$$              
    /$$__  $$                                | $$              
@@ -45,33 +51,39 @@ class SceneAccount extends Phaser.Scene {
 
 
     //Username input
-    const usernameInput = new InputField(this.add.text(640, 300, '', {
+    this.usernameInput = new InputField(this.add.text(640, 300, '', {
       fontFamily: 'college',
       fontSize: '30px',
       fill: '#fff',
       align: 'center'
     }).setOrigin(0.5), {
       placeholder: 'Usuario',
-      max: 15
+      max: 15,
+      onInput: (text) => {
+        OnlineManager.Name = text
+      }
     })
 
 
     //Password input 
-    const passwordInput = new InputField(this.add.text(640, 350, '', {
+    this.passwordInput = new InputField(this.add.text(640, 350, '', {
       fontFamily: 'college',
       fontSize: '30px',
       fill: '#fff',
       align: 'center'
     }).setOrigin(0.5), {
       placeholder: 'Contraseña',
-      max: 15
+      max: 15,
+      onInput: (text) => {
+        OnlineManager.Password = text
+      }
     })
     
 
-    //Register & login buttons
-    const register = new Button(this, 480, 450, 'Crear')
-    Element.onClick(register.image, () => {
-      OnlineManager.register(usernameInput.text, passwordInput.text, (isLogged) => {
+    //Register button
+    this.register = new Button(this, 480, 450, 'Crear')
+    Element.onClick(this.register.image, () => {
+      OnlineManager.register(this.usernameInput.text, this.passwordInput.text, (isLogged) => {
         //Not logged in -> Return
         if (!isLogged) return
 
@@ -79,16 +91,20 @@ class SceneAccount extends Phaser.Scene {
         if (InputField.current) InputField.current.disable()
         
         //Stop scene
-        this.scene.stop()
+        //this.scene.stop()
         
+        //Update buttons
+        this.toggleLogged()
+
         //Check if logged in changed
         mainScene.checkLogged()
       })
     })
 
-    const login = new Button(this, 800, 450, 'Login')
-    Element.onClick(login.image, () => {
-      OnlineManager.login(usernameInput.text, passwordInput.text, (isLogged) => {
+    //Login button
+    this.login = new Button(this, 800, 450, 'Login')
+    Element.onClick(this.login.image, () => {
+      OnlineManager.login(this.usernameInput.text, this.passwordInput.text, (isLogged) => {
         //Not logged in -> Return
         if (!isLogged) return
 
@@ -96,8 +112,32 @@ class SceneAccount extends Phaser.Scene {
         if (InputField.current) InputField.current.disable()
         
         //Stop scene
-        this.scene.stop()
+        //this.scene.stop()
         
+        //Update buttons
+        this.toggleLogged()
+
+        //Check if logged in changed
+        mainScene.checkLogged()
+      })
+    })
+
+    //Logout button
+    this.logout = new Button(this, 800, 450, 'Logout')
+    Element.onClick(this.logout.image, () => {
+      OnlineManager.logout((isLogged) => {
+        //Still logged in -> Return
+        if (isLogged) return
+
+        //Disable input fields
+        if (InputField.current) InputField.current.disable()
+        
+        //Stop scene
+        //this.scene.stop()
+        
+        //Update buttons
+        this.toggleLogged()
+
         //Check if logged in changed
         mainScene.checkLogged()
       })
@@ -119,16 +159,78 @@ class SceneAccount extends Phaser.Scene {
 
 
     //Add delete account button
-    const deleteButton = new Button(this,195 , 600, 'Borrar')
-    Element.onClick(deleteButton.image, () =>{ 
+    this.deleteButton = new Button(this, 480, 450, 'Borrar')
+    Element.onClick(this.deleteButton.image, () =>{ 
       OnlineManager.deleteAccount((isLogged)=>{
         //Still logged in -> Return
-        if (!isLogged) return
+        if (isLogged) return
+
+        //Update buttons
+        this.toggleLogged()
 
         //Check if logged in changed
         mainScene.checkLogged()
       })
     })
 
+    this.toggleLogged()
+
   }
+
+  toggleLogged(){
+    //Already logged
+    if(OnlineManager.isLogged) {
+      this.deleteButton.image.x = 480 
+      this.deleteButton.image.y = 450
+      this.deleteButton.text.x = 480 
+      this.deleteButton.text.y = 450
+
+      this.logout.image.x = 800
+      this.logout.image.y = 450
+      this.logout.text.x = 800
+      this.logout.text.y = 450
+
+      this.register.image.x = -200
+      this.register.image.y = -200
+      this.register.text.x = -200
+      this.register.text.y = -200
+
+      this.login.image.x = -200
+      this.login.image.y = -200
+      this.login.text.x = -200
+      this.login.text.y = -200
+
+      this.usernameInput.text = OnlineManager.Name
+      this.usernameInput.updateText()
+      this.passwordInput.text = OnlineManager.Password
+      this.passwordInput.updateText()
+
+    }else{  //Not logged yet
+      this.deleteButton.image.x = -200 
+      this.deleteButton.image.y = -200
+      this.deleteButton.text.x = -200 
+      this.deleteButton.text.y = -200
+
+      this.logout.image.x = -200
+      this.logout.image.y = -200
+      this.logout.text.x = -200
+      this.logout.text.y = -200
+
+      this.register.image.x = 480
+      this.register.image.y = 450
+      this.register.text.x = 480
+      this.register.text.y = 450
+
+      this.login.image.x = 800
+      this.login.image.y = 450
+      this.login.text.x = 800
+      this.login.text.y = 450
+
+      this.usernameInput.text = ''
+      this.usernameInput.updateText()
+      this.passwordInput.text = ''
+      this.passwordInput.updateText()
+    }
+  }
+  
 }
