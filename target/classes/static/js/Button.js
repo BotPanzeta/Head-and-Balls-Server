@@ -20,4 +20,11 @@ class Button {
       this.image.setTexture('button')
     })
   }
+
+  Move(x, y){
+    this.image.x = x
+    this.image.y = y
+    this.text.x = x
+    this.text.y = y
+  }
 }

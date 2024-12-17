@@ -180,51 +180,26 @@ class SceneAccount extends Phaser.Scene {
   toggleLogged(){
     //Already logged
     if(OnlineManager.isLogged) {
-      this.deleteButton.image.x = 480 
-      this.deleteButton.image.y = 450
-      this.deleteButton.text.x = 480 
-      this.deleteButton.text.y = 450
+      //Move buttons
+      this.deleteButton.Move(480, 450)
+      this.logout.Move(800, 450)
+      this.register.Move(-200, -200)
+      this.login.Move(-200, -200)
 
-      this.logout.image.x = 800
-      this.logout.image.y = 450
-      this.logout.text.x = 800
-      this.logout.text.y = 450
-
-      this.register.image.x = -200
-      this.register.image.y = -200
-      this.register.text.x = -200
-      this.register.text.y = -200
-
-      this.login.image.x = -200
-      this.login.image.y = -200
-      this.login.text.x = -200
-      this.login.text.y = -200
-
+      //Change text
       this.usernameInput.text = OnlineManager.Name
       this.usernameInput.updateText()
       this.passwordInput.text = OnlineManager.Password
       this.passwordInput.updateText()
 
     }else{  //Not logged yet
-      this.deleteButton.image.x = -200 
-      this.deleteButton.image.y = -200
-      this.deleteButton.text.x = -200 
-      this.deleteButton.text.y = -200
+      this.deleteButton.Move(-200, -200)
 
-      this.logout.image.x = -200
-      this.logout.image.y = -200
-      this.logout.text.x = -200
-      this.logout.text.y = -200
+      this.logout.Move(-200, -200)
+     
+      this.register.Move(480, 450)
 
-      this.register.image.x = 480
-      this.register.image.y = 450
-      this.register.text.x = 480
-      this.register.text.y = 450
-
-      this.login.image.x = 800
-      this.login.image.y = 450
-      this.login.text.x = 800
-      this.login.text.y = 450
+      this.login.Move(800, 450)
 
       this.usernameInput.text = ''
       this.usernameInput.updateText()
