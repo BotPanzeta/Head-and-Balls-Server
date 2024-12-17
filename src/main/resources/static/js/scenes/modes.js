@@ -43,7 +43,12 @@ class SceneModes extends Phaser.Scene {
     })
     Element.onClick(online, () => {
       this.scene.stop()
-      this.scene.launch('Account', this)
+      if(!OnlineManager.isLogged){
+        this.scene.launch('Account', mainScene)
+      }else{
+        mainScene.stop()
+        this.scene.launch('Chat')
+      }
     })
 
     //Add local button
