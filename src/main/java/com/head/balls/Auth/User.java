@@ -22,12 +22,12 @@ public class User implements Serializable {
       throw new InvalidCredentialsException("Password is not valid");
 
     //Invalid username size
-    if (username.length() < 3 || username.length() > 15)
-      throw new InvalidCredentialsException("Username must be between 3 and 15 characters");
+    if (username.length() < 1 || username.length() > 15)
+      throw new InvalidCredentialsException("Username must be between 1 and 15 characters");
 
     //Invalid password size
-    if (password.length() < 3 || password.length() > 15)
-      throw new InvalidCredentialsException("Password must be between 3 and 15 characters");
+    if (password.length() < 1 || password.length() > 15)
+      throw new InvalidCredentialsException("Password must be between 1 and 15 characters");
   }
 
   //Getters & setters

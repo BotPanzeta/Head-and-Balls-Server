@@ -104,9 +104,6 @@ class SceneMain extends Phaser.Scene {
       this.sound.setVolume(Settings.volume)
     }
 
-    //Init online manager
-    OnlineManager.init()
-
     
     //Add background music
     SceneMain.music = this.sound.add('music_menu')

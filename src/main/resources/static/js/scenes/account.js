@@ -35,63 +35,54 @@ class SceneAccount extends Phaser.Scene {
     }).setOrigin(0.5)
 
 
-    //IP input
-    const IPInput = new InputField(this.add.text(640, 250, OnlineManager.IP, {
-      fontFamily: 'college',
-      fontSize: '30px',
-      fill: '#fff',
-      align: 'center'
-    }).setOrigin(0.5), {
-      placeholder: 'IP:PUERTO',
-      max: 20,
-      onInput: (text) => {
-        OnlineManager.setIP(text)
-      }
-    })
-
-
     //Username input
-    this.usernameInput = new InputField(this.add.text(640, 300, '', {
-      fontFamily: 'college',
-      fontSize: '30px',
+    this.usernameInput = new InputField(this.add.text(640, 250, '', {
+      fontSize: '40px',
       fill: '#fff',
       align: 'center'
     }).setOrigin(0.5), {
       placeholder: 'Usuario',
       max: 15,
       onInput: (text) => {
-        OnlineManager.Name = text
+        OnlineManager.username = text
       }
     })
 
 
     //Password input 
-    this.passwordInput = new InputField(this.add.text(640, 350, '', {
-      fontFamily: 'college',
-      fontSize: '30px',
+    this.passwordInput = new InputField(this.add.text(640, 300, '', {
+      fontSize: '40px',
       fill: '#fff',
       align: 'center'
     }).setOrigin(0.5), {
       placeholder: 'Contraseña',
       max: 15,
       onInput: (text) => {
-        OnlineManager.Password = text
+        OnlineManager.password = text
       }
     })
+
+
+    //Info text
+    const errorText = this.add.text(640, 350, '', {
+      fontSize: '24px',
+      fill: '#fff',
+      align: 'center'
+    }).setOrigin(0.5)
     
 
     //Register button
     this.register = new Button(this, 480, 450, 'Crear')
     Element.onClick(this.register.image, () => {
-      OnlineManager.register(this.usernameInput.text, this.passwordInput.text, (isLogged) => {
+      OnlineManager.register(this.usernameInput.text, this.passwordInput.text, (isLogged, error) => {
+        //Update error text
+        errorText.text = error ? error.responseText : ''
+
         //Not logged in -> Return
         if (!isLogged) return
 
-        //Disable input fields
-        if (InputField.current) InputField.current.disable()
-        
-        //Stop scene
-        //this.scene.stop()
+        //Reset input fields
+        InputField.reset()
         
         //Update buttons
         this.toggleLogged()
@@ -104,15 +95,15 @@ class SceneAccount extends Phaser.Scene {
     //Login button
     this.login = new Button(this, 800, 450, 'Login')
     Element.onClick(this.login.image, () => {
-      OnlineManager.login(this.usernameInput.text, this.passwordInput.text, (isLogged) => {
+      OnlineManager.login(this.usernameInput.text, this.passwordInput.text, (isLogged, error) => {
+        //Update error text
+        errorText.text = error ? error.responseText : ''
+
         //Not logged in -> Return
         if (!isLogged) return
 
-        //Disable input fields
-        if (InputField.current) InputField.current.disable()
-        
-        //Stop scene
-        //this.scene.stop()
+        //Reset input fields
+        InputField.reset()
         
         //Update buttons
         this.toggleLogged()
@@ -125,16 +116,38 @@ class SceneAccount extends Phaser.Scene {
     //Logout button
     this.logout = new Button(this, 800, 450, 'Logout')
     Element.onClick(this.logout.image, () => {
-      OnlineManager.logout((isLogged) => {
+      OnlineManager.logout((isLogged, error) => {
+        //Update error text
+        errorText.text = error ? error.responseText : ''
+
         //Still logged in -> Return
         if (isLogged) return
 
-        //Disable input fields
-        if (InputField.current) InputField.current.disable()
+        //Reset input fields
+        InputField.reset()
         
-        //Stop scene
-        //this.scene.stop()
-        
+        //Update buttons
+        this.toggleLogged()
+
+        //Check if logged in changed
+        mainScene.checkLogged()
+      })
+    })
+
+
+    //Add delete account button
+    this.deleteButton = new Button(this, 480, 450, 'Borrar')
+    Element.onClick(this.deleteButton.image, () =>{ 
+      OnlineManager.deleteAccount((isLogged, error)=>{
+        //Update error text
+        errorText.text = error ? error.responseText : ''
+
+        //Still logged in -> Return
+        if (isLogged) return
+
+        //Reset input fields
+        InputField.reset()
+
         //Update buttons
         this.toggleLogged()
 
@@ -147,8 +160,8 @@ class SceneAccount extends Phaser.Scene {
     //Add back button
     const back = new Button(this, 640, 600, 'Volver')
     Element.onClick(back.image, () => {
-      //Disable input fields
-      if (InputField.current) InputField.current.disable()
+      //Reset input fields
+      InputField.reset()
       
       //Stop scene
       this.scene.stop()
@@ -158,28 +171,14 @@ class SceneAccount extends Phaser.Scene {
     })
 
 
-    //Add delete account button
-    this.deleteButton = new Button(this, 480, 450, 'Borrar')
-    Element.onClick(this.deleteButton.image, () =>{ 
-      OnlineManager.deleteAccount((isLogged)=>{
-        //Still logged in -> Return
-        if (isLogged) return
-
-        //Update buttons
-        this.toggleLogged()
-
-        //Check if logged in changed
-        mainScene.checkLogged()
-      })
-    })
-
+    //Show the corresponding buttons
     this.toggleLogged()
-
   }
 
-  toggleLogged(){
-    //Already logged
-    if(OnlineManager.isLogged) {
+  toggleLogged() {
+    if (OnlineManager.isLogged) {
+      //Already logged
+
       //Move buttons
       this.deleteButton.Move(480, 450)
       this.logout.Move(800, 450)
@@ -187,25 +186,21 @@ class SceneAccount extends Phaser.Scene {
       this.login.Move(-200, -200)
 
       //Change text
-      this.usernameInput.text = OnlineManager.Name
-      this.usernameInput.updateText()
-      this.passwordInput.text = OnlineManager.Password
-      this.passwordInput.updateText()
+      this.usernameInput.setText(OnlineManager.username)
+      this.passwordInput.setText(OnlineManager.password)
 
-    }else{  //Not logged yet
+    } else {  
+      //Not logged yet
+      
+      //Move buttons
       this.deleteButton.Move(-200, -200)
-
       this.logout.Move(-200, -200)
-     
       this.register.Move(480, 450)
-
       this.login.Move(800, 450)
 
-      this.usernameInput.text = ''
-      this.usernameInput.updateText()
-      this.passwordInput.text = ''
-      this.passwordInput.updateText()
+      //Change text
+      this.usernameInput.setText('')
+      this.passwordInput.setText('')
     }
   }
-  
 }

@@ -37,6 +37,15 @@ class InputField {
     this.updateText()
   }
 
+  setText(text) {
+    //Change text
+    this.text = text
+    this.updateText()
+
+    //Call onInput
+    if (typeof this.onInput === 'function') this.onInput(this.text)
+  }
+
   updateText() {
     if (this.text.length <= 0) {
       //Placeholder
@@ -82,8 +91,19 @@ class InputField {
       //Check key
       switch (event.key.toLowerCase()) {
         //Special
+        case 'f1':
+        case 'f2':
+        case 'f3':
+        case 'f4':
+        case 'f5':
+        case 'f6':
+        case 'f7':
+        case 'f8':
+        case 'f9':
+        case 'f10':
+        case 'f11':
+        case 'f12':
         case 'contextmenu':
-        case 'tab':
         case 'alt':
         case 'altgraph':
         case 'control':
@@ -106,6 +126,7 @@ class InputField {
 
         //Finish
         case 'enter':
+        case 'tab':
           this.disable()
           break
 
@@ -131,5 +152,9 @@ class InputField {
       this.disable()
     else
       this.enable()
+  }
+
+  static reset() {
+    if (InputField.current) InputField.current.disable()
   }
 }

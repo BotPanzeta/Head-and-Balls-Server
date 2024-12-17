@@ -69,7 +69,6 @@ public class AuthController {
   }
 
   public static boolean isLogged(HttpSession session) {
-    System.out.println(session.getId());
     return users.containsKey(session.getAttribute("username"));
   }
 
